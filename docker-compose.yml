@@ -33,9 +33,8 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    command: certonly
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email syaifulanwar2228@gmail.com -d api.gizilo.com --agree-tos
+  
   postgres:
     image: postgres:13
     environment:
