@@ -18,25 +18,14 @@ services:
     image: nginx:latest
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
     depends_on:
       - backend
-      - certbot
     restart: always
-
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    command: certonly --webroot -w /var/www/certbot --force-renewal --email syaifulanwar2228@gmail.com -d api.gizilo.com --agree-tos
-  
+    
   postgres:
-    image: postgres:13
+    image: postgres:15
     environment:
       - POSTGRES_DB=gizilodb
       - POSTGRES_USER=gizilo
