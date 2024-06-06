@@ -10,8 +10,12 @@ exports.createProduct = async (
   gula,
   garam,
   kalium,
-  userId
+  imageUrl
 ) => {
+  if (!name || !ukuran || !kalori || !lemak || !protein || !karbohidrat || !gula || !garam || !kalium || !imageUrl) {
+    throw new Error('Please provide all required fields');
+  }
+
   const product = await prisma.product.create({
     data: {
       name,
@@ -23,26 +27,22 @@ exports.createProduct = async (
       gula,
       garam,
       kalium,
-      users: { connect: { id: userId } },
-    },
+      images: { create: { url: imageUrl } }
+    }
   });
   return product;
 };
 
-exports.getProducts = async (userId) => {
+exports.getProducts = async () => {
   const products = await prisma.product.findMany({
-    where: { users: { some: { id: userId } } },
     include: { images: true },
   });
   return products;
 };
 
-exports.getProductByName = async (name, userId) => {
+exports.getProductByName = async (name) => {
   const product = await prisma.product.findFirst({
-    where: {
-      name,
-      users: { some: { id: userId } },
-    },
+    where: { name },
     include: { images: true },
   });
 
@@ -63,11 +63,10 @@ exports.updateProduct = async (
   karbohidrat,
   gula,
   garam,
-  kalium,
-  userId
+  kalium
 ) => {
   const product = await prisma.product.updateMany({
-    where: { id: parseInt(id), users: { some: { id: userId } } },
+    where: { id: parseInt(id) },
     data: {
       name,
       ukuran,
@@ -83,8 +82,8 @@ exports.updateProduct = async (
   return product;
 };
 
-exports.deleteProduct = async (id, userId) => {
+exports.deleteProduct = async (id) => {
   await prisma.product.deleteMany({
-    where: { id: parseInt(id), users: { some: { id: userId } } },
+    where: { id: parseInt(id) },
   });
 };

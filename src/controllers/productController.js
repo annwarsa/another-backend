@@ -4,7 +4,15 @@ const googleBucket = require('../utils/googleBucket');
 exports.createProduct = async (req, res) => {
   try {
     const { name, ukuran, kalori, lemak, protein, karbohidrat, gula, garam, kalium } = req.body;
+    if (!name || !ukuran || !kalori || !lemak || !protein || !karbohidrat || !gula || !garam || !kalium) {
+      return res.status(400).json({ error: 'Please provide all required fields' });
+    }
+
     const file = req.file;
+    if (!file) {
+      return res.status(400).json({ error: 'Please provide an image' });
+    }
+
     const imageUrl = await googleBucket.uploadToGoogleBucket(file);
     const product = await productService.createProduct(
       name,
@@ -18,9 +26,9 @@ exports.createProduct = async (req, res) => {
       kalium,
       imageUrl
     );
-    res.status(201).json(product);
+    res.status(200).json(product);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
