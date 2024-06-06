@@ -18,13 +18,12 @@ model User {
   username  String
   email     String   @unique
   password  String
-  avatar_src String?
-  products  Product[]
 }
 
 model Product {
   id           Int      @id @default(autoincrement())
   name         String
+  images       String
   ukuran       Float
   kalori       Float
   lemak        Float
@@ -35,13 +34,4 @@ model Product {
   kalium       Float
   last_modified DateTime @updatedAt
   created_at   DateTime 
-  users        User[]
-  images       ProductImage[]
-}
-
-model ProductImage {
-  id        Int      @id @default(autoincrement())
-  url       String
-  product_id Int
-  product   Product   @relation(fields: [product_id], references: [id])
 }
