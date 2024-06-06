@@ -1,5 +1,5 @@
 const productService = require('../services/productService');
-const googleBucket = require('../services/googleBucket');
+const googleBucket = require('../utils/googleBucket');
 
 exports.createProduct = async (req, res) => {
   try {

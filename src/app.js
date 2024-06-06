@@ -7,7 +7,6 @@ dotenv.config();
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
-const imageRoutes = require('./routes/imageRoutes');
 
 const corsMiddleware = require('./middlewares/corsMiddleware');
 const authMiddleware = require('./middlewares/authMiddleware');
@@ -22,6 +21,5 @@ app.use(corsMiddleware);
 app.use('/auth', authRoutes);
 app.use('/users', authMiddleware, userRoutes);
 app.use('/products', authMiddleware, authorizationMiddleware, productRoutes);
-app.use('/images', authMiddleware, authorizationMiddleware, imageRoutes);
 
 module.exports = app;
