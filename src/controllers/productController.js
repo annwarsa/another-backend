@@ -4,7 +4,6 @@ const upload = require('../utils/multerConfig');
 
 exports.createProduct = async (req, res) => {
   try {
-
     upload.single('images')(req, res, async (err) => {
       if (err) {
         return res.status(400).json({ error: err.message });
@@ -57,6 +56,18 @@ exports.getProductByName = async (req, res) => {
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
+};
+
+exports.getProductById = async (id) => {
+  const product = await prisma.product.findUnique({
+    where: { id: parseInt(id) }
+  });
+
+  if (!product) {
+    throw new Error('Product not found');
+  }
+
+  return product;
 };
 
 exports.updateProduct = async (req, res) => {

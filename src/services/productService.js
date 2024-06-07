@@ -34,16 +34,25 @@ exports.createProduct = async (
 };
 
 exports.getProducts = async () => {
-  const products = await prisma.product.findMany({
-    include: { images: true },
-  });
+  const products = await prisma.product.findMany();
   return products;
 };
 
 exports.getProductByName = async (name) => {
   const product = await prisma.product.findFirst({
-    where: { name },
-    include: { images: true },
+    where: { name }
+  });
+
+  if (!product) {
+    throw new Error('Product not found');
+  }
+
+  return product;
+};
+
+exports.getProductById = async (id) => {
+  const product = await prisma.product.findUnique({
+    where: { id: parseInt(id) }
   });
 
   if (!product) {
@@ -66,7 +75,7 @@ exports.updateProduct = async (
   kalium,
   imageUrl
 ) => {
-  const product = await prisma.product.updateMany({
+  const product = await prisma.product.update({
     where: { id: parseInt(id) },
     data: {
       name,
