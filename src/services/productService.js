@@ -1,4 +1,5 @@
 const prisma = require('../utils/prismaClient');
+const _ = require('lodash');
 
 exports.createProduct = async (
   name,
@@ -39,8 +40,14 @@ exports.getProducts = async () => {
 };
 
 exports.getProductByName = async (name) => {
+  const searchTokens = _.words(name.toLowerCase());
   const product = await prisma.product.findFirst({
-    where: { name }
+    where: { 
+      name: {
+        contains : searchTokens,
+        mode: 'insensitive'
+      }
+     }
   });
 
   if (!product) {
