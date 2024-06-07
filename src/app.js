@@ -10,7 +10,6 @@ const productRoutes = require('./routes/productRoutes');
 
 const corsMiddleware = require('./middlewares/corsMiddleware');
 const authMiddleware = require('./middlewares/authMiddleware');
-const authorizationMiddleware = require('./middlewares/authorizationMiddleware');
 
 const app = express();
 
