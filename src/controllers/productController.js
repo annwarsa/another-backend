@@ -1,32 +1,40 @@
 const productService = require('../services/productService');
 const googleBucket = require('../utils/googleBucket');
+const upload = require('../utils/multerConfig');
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, ukuran, kalori, lemak, protein, karbohidrat, gula, garam, kalium } = req.body;
-    if (!name || !ukuran || !kalori || !lemak || !protein || !karbohidrat || !gula || !garam || !kalium) {
-      return res.status(400).json({ error: 'Please provide all required fields' });
-    }
 
-    const file = req.file;
-    if (!file) {
-      return res.status(400).json({ error: 'Please provide an image' });
-    }
+    upload.single('images')(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ error: err.message });
+      }
 
-    const imageUrl = await googleBucket.uploadToGoogleBucket(file);
-    const product = await productService.createProduct(
-      name,
-      ukuran,
-      kalori,
-      lemak,
-      protein,
-      karbohidrat,
-      gula,
-      garam,
-      kalium,
-      imageUrl
-    );
-    res.status(200).json(product);
+      const { name, ukuran, kalori, lemak, protein, karbohidrat, gula, garam, kalium } = req.body;
+      if (!name || !ukuran || !kalori || !lemak || !protein || !karbohidrat || !gula || !garam || !kalium) {
+        return res.status(400).json({ error: 'Please provide all required fields' });
+      }
+
+      const file = req.file; 
+      if (!file) {
+        return res.status(400).json({ error: 'Please provide an image' });
+      }
+
+      const imageUrl = await googleBucket.uploadToGoogleBucket(file);
+      const product = await productService.createProduct(
+        name,
+        ukuran,
+        kalori,
+        lemak,
+        protein,
+        karbohidrat,
+        gula,
+        garam,
+        kalium,
+        imageUrl
+      );
+      res.status(200).json(product);
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
