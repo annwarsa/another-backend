@@ -33,5 +33,5 @@ model Product {
   garam        Float
   kalium       Float
   last_modified DateTime @updatedAt
-  created_at   DateTime 
+  created_at   DateTime @default(now())
 }

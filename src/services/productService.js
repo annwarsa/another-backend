@@ -27,7 +27,7 @@ exports.createProduct = async (
       gula,
       garam,
       kalium,
-      images: { create: { url: imageUrl } }
+      images: imageUrl
     }
   });
   return product;
