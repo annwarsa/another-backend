@@ -23,14 +23,14 @@ exports.createProduct = async (req, res) => {
       const imageUrl = await googleBucket.uploadToGoogleBucket(file);
       const product = await productService.createProduct(
         name,
-        ukuran,
-        kalori,
-        lemak,
-        protein,
-        karbohidrat,
-        gula,
-        garam,
-        kalium,
+        parseFloat(ukuran),
+        parseFloat(kalori),
+        parseFloat(lemak),
+        parseFloat(protein),
+        parseFloat(karbohidrat),
+        parseFloat(gula),
+        parseFloat(garam),
+        parseFloat(kalium),
         imageUrl
       );
       res.status(200).json(product);
@@ -71,14 +71,14 @@ exports.updateProduct = async (req, res) => {
     const product = await productService.updateProduct(
       id,
       name,
-      ukuran,
-      kalori,
-      lemak,
-      protein,
-      karbohidrat,
-      gula,
-      garam,
-      kalium,
+      parseFloat(ukuran),
+      parseFloat(kalori),
+      parseFloat(lemak),
+      parseFloat(protein),
+      parseFloat(karbohidrat),
+      parseFloat(gula),
+      parseFloat(garam),
+      parseFloat(kalium),
       imageUrl
     );
     res.status(200).json(product);
