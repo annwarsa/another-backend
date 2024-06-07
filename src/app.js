@@ -20,6 +20,6 @@ app.use(corsMiddleware);
 
 app.use('/auth', authRoutes);
 app.use('/users', authMiddleware, userRoutes);
-app.use('/products', authMiddleware, authorizationMiddleware, productRoutes);
+app.use('/products', authMiddleware, productRoutes);
 
 module.exports = app;

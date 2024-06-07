@@ -63,7 +63,8 @@ exports.updateProduct = async (
   karbohidrat,
   gula,
   garam,
-  kalium
+  kalium,
+  imageUrl
 ) => {
   const product = await prisma.product.updateMany({
     where: { id: parseInt(id) },
@@ -77,6 +78,7 @@ exports.updateProduct = async (
       gula,
       garam,
       kalium,
+      images: imageUrl | undefined
     },
   });
   return product;
