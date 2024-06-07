@@ -44,7 +44,7 @@ exports.getProductByName = async (name) => {
   const product = await prisma.product.findFirst({
     where: { 
       name: {
-        contains : searchTokens,
+        in : searchTokens,
         mode: 'insensitive'
       }
      }
