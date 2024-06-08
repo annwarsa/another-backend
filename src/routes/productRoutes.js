@@ -1,5 +1,6 @@
 const express = require('express');
 const productController = require('../controllers/productController');
+const upload = require('../utils/multerConfig');
 
 const router = express.Router();
 
