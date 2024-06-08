@@ -12,7 +12,7 @@ exports.createProduct = async (req, res) => {
         return res.status(400).json({ error: err.message });
       }
 
-      const { file } = files;
+      const { image } = files;
       const {
         name,
         weight,
@@ -26,17 +26,17 @@ exports.createProduct = async (req, res) => {
       } = fields;
 
       console.log('Request data:', fields);
-      console.log('File:', file);
+      console.log('File:', image);
 
       if (!name || !weight || !calories || !fat || !proteins || !carbohydrate || !sugar || !sodium || !potassium) {
         return res.status(400).json({ error: 'Please provide all required fields' });
       }
 
-      if (!file) {
+      if (!image) {
         return res.status(400).json({ error: 'Please provide an image' });
       }
 
-      const imageUrl = await googleBucket.uploadToGoogleBucket(file);
+      const imageUrl = await googleBucket.uploadToGoogleBucket(image);
       const product = await productService.createProduct(
         name,
         parseFloat(weight),
@@ -104,7 +104,7 @@ exports.updateProduct = async (req, res) => {
       }
 
       const { id } = req.params;
-      const { file } = files;
+      const { image } = files;
       const {
         name,
         weight,
@@ -118,11 +118,11 @@ exports.updateProduct = async (req, res) => {
       } = fields;
 
       console.log('Request data:', fields);
-      console.log('File:', file);
+      console.log('File:', image);
 
       let imageUrl;
-      if (file) {
-        imageUrl = await googleBucket.uploadToGoogleBucket(file);
+      if (image) {
+        imageUrl = await googleBucket.uploadToGoogleBucket(image);
       }
 
       const product = await productService.updateProduct(
