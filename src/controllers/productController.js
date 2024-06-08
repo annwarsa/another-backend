@@ -37,7 +37,7 @@ exports.createProduct = async (req, res) => {
       if (!imageFile) {
         return res.status(400).json({ error: 'Please provide an image' });
       }
-
+      const filePath = path.join(uploadsDir, imageFile.filename);        
       const imageUrl = await googleBucket.uploadToGoogleBucket(imageFile, uploadsDir, imageFile.originalname);
       const product = await productService.createProduct({
         name,
