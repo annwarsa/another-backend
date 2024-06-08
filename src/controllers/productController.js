@@ -1,32 +1,53 @@
 const productService = require('../services/productService');
 const googleBucket = require('../utils/googleBucket');
-
-const validateProductFields = (fields) => {
-  const requiredFields = ['name', 'weight', 'calories', 'fat', 'proteins', 'carbohydrate', 'sugar', 'sodium', 'potassium'];
-  for (const field of requiredFields) {
-    if (!fields[field]) {
-      return false;
-    }
-  }
-  return true;
-};
+const upload = require('../utils/multerConfig');
 
 exports.createProduct = async (req, res) => {
-  try {
-    const { file, body } = req;
-    if (!validateProductFields(body)) {
-      return res.status(400).json({ error: 'Please provide all required fields' });
-    }
-    if (!file) {
-      return res.status(400).json({ error: 'Please provide an image' });
-    }
+  upload.single('images')(req, res, async (err) => {
+    try {
+      if (err) {
+        return res.status(400).json({ error: err.message });
+      }
 
-    const imageUrl = await googleBucket.uploadToGoogleBucket(file);
-    const product = await productService.createProduct({ ...body, imageUrl });
-    res.status(200).json(product);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+      const { file } = req;
+      const {
+        name,
+        weight,
+        calories,
+        fat,
+        proteins,
+        carbohydrate,
+        sugar,
+        sodium,
+        potassium,
+      } = req.body;
+
+      if (!name || !weight || !calories || !fat || !proteins || !carbohydrate || !sugar || !sodium || !potassium) {
+        return res.status(400).json({ error: 'Please provide all required fields' });
+      }
+
+      if (!file) {
+        return res.status(400).json({ error: 'Please provide an image' });
+      }
+
+      const imageUrl = await googleBucket.uploadToGoogleBucket(file);
+      const product = await productService.createProduct(
+        name,
+        parseFloat(weight),
+        parseFloat(calories),
+        parseFloat(fat),
+        parseFloat(proteins),
+        parseFloat(carbohydrate),
+        parseFloat(sugar),
+        parseFloat(sodium),
+        parseFloat(potassium),
+        imageUrl
+      );
+      res.status(200).json(product);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
 };
 
 exports.getProducts = async (req, res) => {
@@ -59,20 +80,38 @@ exports.getProductById = async (req, res) => {
 };
 
 exports.updateProduct = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { file, body } = req;
+  upload.single('images')(req, res, async (err) => {
+    try {
+      if (err) {
+        return res.status(400).json({ error: err.message });
+      }
 
-    let imageUrl;
-    if (file) {
-      imageUrl = await googleBucket.uploadToGoogleBucket(file);
+      const { id } = req.params;
+      const { file } = req;
+      const { name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium } = req.body;
+
+      let imageUrl;
+      if (file) {
+        imageUrl = await googleBucket.uploadToGoogleBucket(file);
+      }
+      const product = await productService.updateProduct(
+        id,
+        name,
+        parseFloat(weight),
+        parseFloat(calories),
+        parseFloat(fat),
+        parseFloat(proteins),
+        parseFloat(carbohydrate),
+        parseFloat(sugar),
+        parseFloat(sodium),
+        parseFloat(potassium),
+        imageUrl
+      );
+      res.status(200).json(product);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
     }
-
-    const product = await productService.updateProduct(id, { ...body, imageUrl });
-    res.status(200).json(product);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+  });
 };
 
 exports.deleteProduct = async (req, res) => {
