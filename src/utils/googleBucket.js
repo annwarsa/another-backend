@@ -1,5 +1,9 @@
 const { Storage } = require('@google-cloud/storage');
 const fs = require('fs');
+const util = require('util');
+const path = require('path');
+
+const stat = util.promisify(fs.stat);
 
 const storage = new Storage({
   credentials: {
@@ -26,6 +30,11 @@ exports.uploadToGoogleBucket = async (file) => {
       resumable: false,
     });
 
+    const filePath = path.join(file.destination, file.filename);
+
+    // Wait for the file to be available
+    await stat(filePath);
+
     return new Promise((resolve, reject) => {
       blobStream.on('error', (err) => reject(err));
       blobStream.on('finish', async () => {
@@ -34,11 +43,7 @@ exports.uploadToGoogleBucket = async (file) => {
         resolve(publicUrl);
       });
 
-      if (!file.path) {
-        reject(new Error('File path is undefined'));
-      } else {
-        fs.createReadStream(file.path).pipe(blobStream);
-      }
+      fs.createReadStream(filePath).pipe(blobStream);
     });
   } catch (error) {
     console.error('Error uploading file to Google Cloud Storage:', error);
