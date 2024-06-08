@@ -15,13 +15,13 @@ const storage = new Storage({
 
 const bucket = storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET);
 
-exports.uploadToGoogleBucket = async (file) => {
+exports.uploadToGoogleBucket = async (file, destination, filename) => {
   try {
     if (!file) {
       throw new Error('No file provided');
     }
 
-    const fileName = `${Date.now()}-${file.originalname}`;
+    const fileName = `${Date.now()}-${filename}`;
     const blob = bucket.file(fileName);
     const blobStream = blob.createWriteStream({
       metadata: {
@@ -30,7 +30,7 @@ exports.uploadToGoogleBucket = async (file) => {
       resumable: false,
     });
 
-    const filePath = path.join(file.destination, file.filename);
+    const filePath = path.join(destination, filename);
 
     // Wait for the file to be available
     await stat(filePath);

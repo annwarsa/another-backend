@@ -36,7 +36,7 @@ exports.createProduct = async (req, res) => {
         return res.status(400).json({ error: 'Please provide an image' });
       }
 
-      const imageUrl = await googleBucket.uploadToGoogleBucket(imageFile.path);
+      const imageUrl = await googleBucket.uploadToGoogleBucket(imageFile, uploadsDir, imageFile.originalname);
       const product = await productService.createProduct({
         name,
         weight: parseFloat(weight),
@@ -60,6 +60,7 @@ exports.createProduct = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 exports.getProducts = async (req, res) => {
   try {
