@@ -1,25 +1,42 @@
+const Busboy = require('busboy');
 const productService = require('../services/productService');
 const googleBucket = require('../utils/googleBucket');
-const upload = require('../utils/multerConfig');
 
 exports.createProduct = async (req, res) => {
   try {
-    upload.single('images')(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({ error: err.message });
-      }
+    const busboy = new Busboy({ headers: req.headers });
+    let fields = {};
+    let fileData = null;
 
-      const { name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium } = req.body;
+    busboy.on('file', (fieldname, file, _filename, _encoding, _mimetype) => {
+      if (fieldname === 'images') {
+        const chunks = [];
+        file.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+        file.on('end', () => {
+          fileData = Buffer.concat(chunks);
+        });
+      } else {
+        file.resume();
+      }
+    });
+
+    busboy.on('field', (fieldname, value) => {
+      fields[fieldname] = value;
+    });
+
+    busboy.on('finish', async () => {
+      const { name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium } = fields;
       if (!name || !weight || !calories || !fat || !proteins || !carbohydrate || !sugar || !sodium || !potassium) {
         return res.status(400).json({ error: 'Please provide all required fields' });
       }
 
-      const file = req.file; 
-      if (!file) {
+      if (!fileData) {
         return res.status(400).json({ error: 'Please provide an image' });
       }
 
-      const imageUrl = await googleBucket.uploadToGoogleBucket(file);
+      const imageUrl = await googleBucket.uploadToGoogleBucket(fileData);
       const product = await productService.createProduct(
         name,
         parseFloat(weight),
@@ -34,6 +51,13 @@ exports.createProduct = async (req, res) => {
       );
       res.status(200).json(product);
     });
+
+    busboy.on('error', (err) => {
+      console.error('Error:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    });
+
+    req.pipe(busboy);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -71,26 +95,56 @@ exports.getProductById = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium } = req.body;
-    const file = req.file;
-    let imageUrl;
-    if (file) {
-      imageUrl = await googleBucket.uploadToGoogleBucket(file);
-    }
-    const product = await productService.updateProduct(
-      id,
-      name,
-      parseFloat(weight),
-      parseFloat(calories),
-      parseFloat(fat),
-      parseFloat(proteins),
-      parseFloat(carbohydrate),
-      parseFloat(sugar),
-      parseFloat(sodium),
-      parseFloat(potassium),
-      imageUrl
-    );
-    res.status(200).json(product);
+    const busboy = new Busboy({ headers: req.headers });
+    let fields = {};
+    let fileData = null;
+
+    busboy.on('file', (fieldname, file, _filename, _encoding, _mimetype) => {
+      if (fieldname === 'images') {
+        const chunks = [];
+        file.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+        file.on('end', () => {
+          fileData = Buffer.concat(chunks);
+        });
+      } else {
+        file.resume();
+      }
+    });
+
+    busboy.on('field', (fieldname, value) => {
+      fields[fieldname] = value;
+    });
+
+    busboy.on('finish', async () => {
+      const { name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium } = fields;
+      let imageUrl;
+      if (fileData) {
+        imageUrl = await googleBucket.uploadToGoogleBucket(fileData);
+      }
+      const product = await productService.updateProduct(
+        id,
+        name,
+        parseFloat(weight),
+        parseFloat(calories),
+        parseFloat(fat),
+        parseFloat(proteins),
+        parseFloat(carbohydrate),
+        parseFloat(sugar),
+        parseFloat(sodium),
+        parseFloat(potassium),
+        imageUrl
+      );
+      res.status(200).json(product);
+    });
+
+    busboy.on('error', (err) => {
+      console.error('Error:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    });
+
+    req.pipe(busboy);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
