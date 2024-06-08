@@ -11,22 +11,39 @@ const storage = new Storage({
 const bucket = storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET);
 
 exports.uploadToGoogleBucket = async (file) => {
-  const fileName = `${Date.now()}-${file.originalname}`;
-  const blob = bucket.file(fileName);
-  const stream = blob.createWriteStream({
-    metadata: {
-      contentType: file.mimetype,
-    },
-  });
+  try {
+    if (!file) {
+      throw new Error('No file provided');
+    }
+    const fileName = `${Date.now()}-${file.originalname}`;
+    const blob = bucket.file(fileName);
+    const stream = blob.createWriteStream({
+      metadata: {
+        contentType: file.mimetype,
+      },
+    });
 
-  return new Promise((resolve, reject) => {
-    stream.on('error', (err) => reject(err));
-    stream.on('finish', () => resolve(`https://storage.googleapis.com/${bucket.name}/${fileName}`));
-    stream.end(file.buffer);
-  });
+    return new Promise((resolve, reject) => {
+      stream.on('error', (err) => reject(err));
+      stream.on('finish', () => resolve(`https://storage.googleapis.com/${bucket.name}/${fileName}`));
+      stream.end(file.buffer);
+    });
+  } catch (error) {
+    console.error('Error uploading file to Google Cloud Storage:', error);
+    throw error;
+  }
 };
 
 exports.deleteFromGoogleBucket = async (url) => {
-  const fileName = url.split('/').pop();
-  await bucket.file(fileName).delete();
+  try {
+    const fileName = url.split('/').pop();
+    const file = bucket.file(fileName);
+    if (!file) {
+      throw new Error('File not found');
+    }
+    await file.delete();
+  } catch (error) {
+    console.error('Error deleting file from Google Cloud Storage:', error);
+    throw error;
+  }
 };
