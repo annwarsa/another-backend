@@ -1,18 +1,18 @@
 const productService = require('../services/productService');
 const googleBucket = require('../utils/googleBucket');
-const formidable = require('formidable');
+const upload = require('../utils/multerConfig');
+const fs = require('fs').promises;
 
 exports.createProduct = async (req, res) => {
-  const form = new formidable.IncomingForm();
-
-  form.parse(req, async (err, fields, files) => {
-    try {
+  try {
+    await upload.single('image')(req, res, async (err) => {
       if (err) {
-        console.error('Error creating product:', err);
+        console.error('Error uploading file:', err);
         return res.status(400).json({ error: err.message });
       }
 
-      const { image } = files;
+      const image = req.file;
+
       const {
         name,
         weight,
@@ -23,9 +23,9 @@ exports.createProduct = async (req, res) => {
         sugar,
         sodium,
         potassium,
-      } = fields;
+      } = req.body;
 
-      console.log('Request data:', fields);
+      console.log('Request data:', req.body);
       console.log('File:', image);
 
       if (!name || !weight || !calories || !fat || !proteins || !carbohydrate || !sugar || !sodium || !potassium) {
@@ -36,7 +36,7 @@ exports.createProduct = async (req, res) => {
         return res.status(400).json({ error: 'Please provide an image' });
       }
 
-      const imageUrl = await googleBucket.uploadToGoogleBucket(image);
+      const imageUrl = await googleBucket.uploadToGoogleBucket(image.path);
       const product = await productService.createProduct(
         name,
         parseFloat(weight),
@@ -50,12 +50,15 @@ exports.createProduct = async (req, res) => {
         imageUrl
       );
       console.log('Product created:', product);
+
+      await fs.unlink(image.path);
+
       res.status(200).json(product);
-    } catch (error) {
-      console.error('Error creating product:', error);
-      res.status(500).json({ error: error.message });
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Error creating product:', error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
 exports.getProducts = async (req, res) => {
@@ -94,17 +97,15 @@ exports.getProductById = async (req, res) => {
 };
 
 exports.updateProduct = async (req, res) => {
-  const form = new formidable.IncomingForm();
-
-  form.parse(req, async (err, fields, files) => {
-    try {
+  try {
+    await upload.single('image')(req, res, async (err) => {
       if (err) {
-        console.error('Error updating product:', err);
+        console.error('Error uploading file:', err);
         return res.status(400).json({ error: err.message });
       }
 
       const { id } = req.params;
-      const { image } = files;
+      const image = req.file;
       const {
         name,
         weight,
@@ -115,14 +116,15 @@ exports.updateProduct = async (req, res) => {
         sugar,
         sodium,
         potassium,
-      } = fields;
+      } = req.body;
 
-      console.log('Request data:', fields);
+      console.log('Request data:', req.body);
       console.log('File:', image);
 
       let imageUrl;
       if (image) {
-        imageUrl = await googleBucket.uploadToGoogleBucket(image);
+        imageUrl = await googleBucket.uploadToGoogleBucket(image.path);
+        await fs.unlink(image.path);
       }
 
       const product = await productService.updateProduct(
@@ -140,11 +142,11 @@ exports.updateProduct = async (req, res) => {
       );
       console.log('Product updated:', product);
       res.status(200).json(product);
-    } catch (error) {
-      console.error('Error updating product:', error);
-      res.status(400).json({ error: error.message });
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(400).json({ error: error.message });
+  }
 };
 
 exports.deleteProduct = async (req, res) => {
