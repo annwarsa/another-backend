@@ -3,6 +3,8 @@ const googleBucket = require('../utils/googleBucket');
 const upload = require('../utils/multerConfig');
 const fs = require('fs').promises;
 
+const uploadsDir = upload.storage.destination;
+
 exports.createProduct = async (req, res) => {
   try {
     upload.single('images')(req, res, async (err) => {
