@@ -6,6 +6,7 @@ exports.createProduct = async (req, res) => {
   upload.single('imageUrl')(req, res, async (err) => {
     try {
       if (err) {
+        console.error('Error creating product:', err);
         return res.status(400).json({ error: err.message });
       }
 
@@ -21,6 +22,9 @@ exports.createProduct = async (req, res) => {
         sodium,
         potassium,
       } = req.body;
+
+      console.log('Request data:', req.body);
+      console.log('File:', file);
 
       if (!name || !weight || !calories || !fat || !proteins || !carbohydrate || !sugar || !sodium || !potassium) {
         return res.status(400).json({ error: 'Please provide all required fields' });
@@ -43,8 +47,10 @@ exports.createProduct = async (req, res) => {
         parseFloat(potassium),
         imageUrl
       );
+      console.log('Product created:', product);
       res.status(200).json(product);
     } catch (error) {
+      console.error('Error creating product:', error);
       res.status(500).json({ error: error.message });
     }
   });
@@ -53,8 +59,10 @@ exports.createProduct = async (req, res) => {
 exports.getProducts = async (req, res) => {
   try {
     const products = await productService.getProducts();
+    console.log('Products:', products);
     res.status(200).json(products);
   } catch (error) {
+    console.error('Error getting products:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -63,8 +71,10 @@ exports.getProductByName = async (req, res) => {
   try {
     const { name } = req.params;
     const product = await productService.getProductByName(name);
+    console.log('Product:', product);
     res.status(200).json(product);
   } catch (error) {
+    console.error('Error getting product by name:', error);
     res.status(404).json({ error: error.message });
   }
 };
@@ -73,8 +83,10 @@ exports.getProductById = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await productService.getProductById(id);
+    console.log('Product:', product);
     res.status(200).json(product);
   } catch (error) {
+    console.error('Error getting product by id:', error);
     res.status(404).json({ error: error.message });
   }
 };
@@ -83,6 +95,7 @@ exports.updateProduct = async (req, res) => {
   upload.single('imageUrl')(req, res, async (err) => {
     try {
       if (err) {
+        console.error('Error updating product:', err);
         return res.status(400).json({ error: err.message });
       }
 
@@ -90,10 +103,14 @@ exports.updateProduct = async (req, res) => {
       const { file } = req;
       const { name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium } = req.body;
 
+      console.log('Request data:', req.body);
+      console.log('File:', file);
+
       let imageUrl;
       if (file) {
         imageUrl = await googleBucket.uploadToGoogleBucket(file);
       }
+
       const product = await productService.updateProduct(
         id,
         name,
@@ -107,8 +124,10 @@ exports.updateProduct = async (req, res) => {
         parseFloat(potassium),
         imageUrl
       );
+      console.log('Product updated:', product);
       res.status(200).json(product);
     } catch (error) {
+      console.error('Error updating product:', error);
       res.status(400).json({ error: error.message });
     }
   });
@@ -122,8 +141,10 @@ exports.deleteProduct = async (req, res) => {
       await googleBucket.deleteFromGoogleBucket(product.images);
     }
     await productService.deleteProduct(id);
+    console.log('Product deleted:', id);
     res.status(204).json();
   } catch (error) {
+    console.error('Error deleting product:', error);
     res.status(400).json({ error: error.message });
   }
 };
