@@ -16,6 +16,7 @@ exports.uploadToGoogleBucket = async (file) => {
     if (!file) {
       throw new Error('No file provided');
     }
+
     const fileName = `${Date.now()}-${file.originalname}`;
     const blob = bucket.file(fileName);
     const blobStream = blob.createWriteStream({
@@ -32,7 +33,12 @@ exports.uploadToGoogleBucket = async (file) => {
         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${metadata.name}`;
         resolve(publicUrl);
       });
-      fs.createReadStream(file.path).pipe(blobStream);
+
+      if (!file.path) {
+        reject(new Error('File path is undefined'));
+      } else {
+        fs.createReadStream(file.path).pipe(blobStream);
+      }
     });
   } catch (error) {
     console.error('Error uploading file to Google Cloud Storage:', error);
