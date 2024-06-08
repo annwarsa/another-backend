@@ -25,14 +25,14 @@ model Product {
   id           Int      @id @default(autoincrement())
   name         String
   images       String
-  ukuran       Float
-  kalori       Float
-  lemak        Float
-  protein      Float
-  karbohidrat  Float
-  gula         Float
-  garam        Float
-  kalium       Float
+  weight       Float
+  calories     Float
+  fat          Float
+  proteins     Float
+  carbohydrate Float
+  sugar        Float
+  sodium       Float
+  potassium    Float
   last_modified DateTime @updatedAt
   created_at   DateTime @default(now())
 }

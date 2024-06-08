@@ -3,31 +3,31 @@ const _ = require('lodash');
 
 exports.createProduct = async (
   name,
-  ukuran,
-  kalori,
-  lemak,
-  protein,
-  karbohidrat,
-  gula,
-  garam,
-  kalium,
+  weight,
+  calories,
+  fat,
+  proteins,
+  carbohydrate,
+  sugar,
+  sodium,
+  potassium,
   imageUrl
 ) => {
-  if (!name || !ukuran || !kalori || !lemak || !protein || !karbohidrat || !gula || !garam || !kalium || !imageUrl) {
+  if (!name || !weight || !calories || !fat || !proteins || !carbohydrate || !sugar || !sodium || !potassium || !imageUrl) {
     throw new Error('Please provide all required fields');
   }
 
   const product = await prisma.product.create({
     data: {
       name,
-      ukuran,
-      kalori,
-      lemak,
-      protein,
-      karbohidrat,
-      gula,
-      garam,
-      kalium,
+      weight,
+      calories,
+      fat,
+      proteins,
+      carbohydrate,
+      sugar,
+      sodium,
+      potassium,
       images: imageUrl
     }
   });
@@ -72,28 +72,28 @@ exports.getProductById = async (id) => {
 exports.updateProduct = async (
   id,
   name,
-  ukuran,
-  kalori,
-  lemak,
-  protein,
-  karbohidrat,
-  gula,
-  garam,
-  kalium,
+  weight,
+  calories,
+  fat,
+  proteins,
+  carbohydrate,
+  sugar,
+  sodium,
+  potassium,
   imageUrl
 ) => {
   const product = await prisma.product.update({
     where: { id: parseInt(id) },
     data: {
       name,
-      ukuran,
-      kalori,
-      lemak,
-      protein,
-      karbohidrat,
-      gula,
-      garam,
-      kalium,
+      weight,
+      calories,
+      fat,
+      proteins,
+      carbohydrate,
+      sugar,
+      sodium,
+      potassium,
       images: imageUrl | undefined
     },
   });

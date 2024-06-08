@@ -9,8 +9,8 @@ exports.createProduct = async (req, res) => {
         return res.status(400).json({ error: err.message });
       }
 
-      const { name, ukuran, kalori, lemak, protein, karbohidrat, gula, garam, kalium } = req.body;
-      if (!name || !ukuran || !kalori || !lemak || !protein || !karbohidrat || !gula || !garam || !kalium) {
+      const { name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium } = req.body;
+      if (!name || !weight || !calories || !fat || !proteins || !carbohydrate || !sugar || !sodium || !potassium) {
         return res.status(400).json({ error: 'Please provide all required fields' });
       }
 
@@ -22,14 +22,14 @@ exports.createProduct = async (req, res) => {
       const imageUrl = await googleBucket.uploadToGoogleBucket(file);
       const product = await productService.createProduct(
         name,
-        parseFloat(ukuran),
-        parseFloat(kalori),
-        parseFloat(lemak),
-        parseFloat(protein),
-        parseFloat(karbohidrat),
-        parseFloat(gula),
-        parseFloat(garam),
-        parseFloat(kalium),
+        parseFloat(weight),
+        parseFloat(calories),
+        parseFloat(fat),
+        parseFloat(proteins),
+        parseFloat(carbohydrate),
+        parseFloat(sugar),
+        parseFloat(sodium),
+        parseFloat(potassium),
         imageUrl
       );
       res.status(200).json(product);
@@ -71,7 +71,7 @@ exports.getProductById = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, ukuran, kalori, lemak, protein, karbohidrat, gula, garam, kalium } = req.body;
+    const { name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium } = req.body;
     const file = req.file;
     let imageUrl;
     if (file) {
@@ -80,14 +80,14 @@ exports.updateProduct = async (req, res) => {
     const product = await productService.updateProduct(
       id,
       name,
-      parseFloat(ukuran),
-      parseFloat(kalori),
-      parseFloat(lemak),
-      parseFloat(protein),
-      parseFloat(karbohidrat),
-      parseFloat(gula),
-      parseFloat(garam),
-      parseFloat(kalium),
+      parseFloat(weight),
+      parseFloat(calories),
+      parseFloat(fat),
+      parseFloat(proteins),
+      parseFloat(carbohydrate),
+      parseFloat(sugar),
+      parseFloat(sodium),
+      parseFloat(potassium),
       imageUrl
     );
     res.status(200).json(product);
