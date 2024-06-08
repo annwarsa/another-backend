@@ -2,8 +2,10 @@ const productService = require('../services/productService');
 const googleBucket = require('../utils/googleBucket');
 const upload = require('../utils/multerConfig');
 const fs = require('fs').promises;
+const path = require('path');
 
-const uploadsDir = upload.storage.destination;
+// Define the fixed upload path
+const uploadsDir = path.join(__dirname, '..', 'uploads');
 
 exports.createProduct = async (req, res) => {
   try {
@@ -37,8 +39,9 @@ exports.createProduct = async (req, res) => {
       if (!imageFile) {
         return res.status(400).json({ error: 'Please provide an image' });
       }
-      const filePath = path.join(uploadsDir, imageFile.filename);        
-      const imageUrl = await googleBucket.uploadToGoogleBucket(imageFile, uploadsDir, imageFile.originalname);
+
+      // Pass the correct file path to the uploadToGoogleBucket function
+      const imageUrl = await googleBucket.uploadToGoogleBucket(imageFile, uploadsDir, imageFile.filename);
       const product = await productService.createProduct({
         name,
         weight: parseFloat(weight),
@@ -53,7 +56,7 @@ exports.createProduct = async (req, res) => {
       });
       console.log('Product created:', product);
 
-      await fs.unlink(imageFile.path);
+      await fs.unlink(path.join(uploadsDir, imageFile.filename));
 
       res.status(200).json(product);
     });
@@ -62,7 +65,6 @@ exports.createProduct = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 exports.getProducts = async (req, res) => {
   try {
@@ -126,8 +128,8 @@ exports.updateProduct = async (req, res) => {
 
       let imageUrl;
       if (imageFile) {
-        imageUrl = await googleBucket.uploadToGoogleBucket(imageFile.path);
-        await fs.unlink(imageFile.path);
+        imageUrl = await googleBucket.uploadToGoogleBucket(imageFile, uploadsDir, imageFile.filename);
+        await fs.unlink(path.join(uploadsDir, imageFile.filename));
       }
 
       const product = await productService.updateProduct(

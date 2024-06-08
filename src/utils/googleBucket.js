@@ -30,7 +30,7 @@ exports.uploadToGoogleBucket = async (file, destination, filename) => {
       resumable: false,
     });
 
-    const filePath = path.join(destination, filename);
+    const filePath = path.join(destination, file.filename);
 
     // Wait for the file to be available
     await stat(filePath);
