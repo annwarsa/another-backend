@@ -1,4 +1,5 @@
 const { Storage } = require('@google-cloud/storage');
+const fs = require('fs');
 
 const storage = new Storage({
   credentials: {
@@ -21,12 +22,13 @@ exports.uploadToGoogleBucket = async (file) => {
       metadata: {
         contentType: file.mimetype,
       },
+      resumable: false,
     });
 
     return new Promise((resolve, reject) => {
       stream.on('error', (err) => reject(err));
       stream.on('finish', () => resolve(`https://storage.googleapis.com/${bucket.name}/${fileName}`));
-      stream.end(file.buffer);
+      fs.createReadStream(file.path).pipe(stream);
     });
   } catch (error) {
     console.error('Error uploading file to Google Cloud Storage:', error);
