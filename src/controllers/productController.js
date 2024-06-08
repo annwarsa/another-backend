@@ -1,16 +1,18 @@
 const productService = require('../services/productService');
 const googleBucket = require('../utils/googleBucket');
-const upload = require('../utils/multerConfig');
+const formidable = require('formidable');
 
 exports.createProduct = async (req, res) => {
-  upload.single('imageUrl')(req, res, async (err) => {
+  const form = new formidable.IncomingForm();
+
+  form.parse(req, async (err, fields, files) => {
     try {
       if (err) {
         console.error('Error creating product:', err);
         return res.status(400).json({ error: err.message });
       }
 
-      const { file } = req;
+      const { file } = files;
       const {
         name,
         weight,
@@ -21,9 +23,9 @@ exports.createProduct = async (req, res) => {
         sugar,
         sodium,
         potassium,
-      } = req.body;
+      } = fields;
 
-      console.log('Request data:', req.body);
+      console.log('Request data:', fields);
       console.log('File:', file);
 
       if (!name || !weight || !calories || !fat || !proteins || !carbohydrate || !sugar || !sodium || !potassium) {
@@ -92,7 +94,9 @@ exports.getProductById = async (req, res) => {
 };
 
 exports.updateProduct = async (req, res) => {
-  upload.single('imageUrl')(req, res, async (err) => {
+  const form = new formidable.IncomingForm();
+
+  form.parse(req, async (err, fields, files) => {
     try {
       if (err) {
         console.error('Error updating product:', err);
@@ -100,10 +104,20 @@ exports.updateProduct = async (req, res) => {
       }
 
       const { id } = req.params;
-      const { file } = req;
-      const { name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium } = req.body;
+      const { file } = files;
+      const {
+        name,
+        weight,
+        calories,
+        fat,
+        proteins,
+        carbohydrate,
+        sugar,
+        sodium,
+        potassium,
+      } = fields;
 
-      console.log('Request data:', req.body);
+      console.log('Request data:', fields);
       console.log('File:', file);
 
       let imageUrl;
