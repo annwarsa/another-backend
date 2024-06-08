@@ -18,7 +18,7 @@ exports.uploadToGoogleBucket = async (file) => {
     }
     const fileName = `${Date.now()}-${file.originalname}`;
     const blob = bucket.file(fileName);
-    const stream = blob.createWriteStream({
+    const blobStream = blob.createWriteStream({
       metadata: {
         contentType: file.mimetype,
       },
@@ -26,9 +26,13 @@ exports.uploadToGoogleBucket = async (file) => {
     });
 
     return new Promise((resolve, reject) => {
-      stream.on('error', (err) => reject(err));
-      stream.on('finish', () => resolve(`https://storage.googleapis.com/${bucket.name}/${fileName}`));
-      fs.createReadStream(file.path).pipe(stream);
+      blobStream.on('error', (err) => reject(err));
+      blobStream.on('finish', async () => {
+        const [metadata] = await blob.getMetadata();
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${metadata.name}`;
+        resolve(publicUrl);
+      });
+      fs.createReadStream(file.path).pipe(blobStream);
     });
   } catch (error) {
     console.error('Error uploading file to Google Cloud Storage:', error);
