@@ -20,14 +20,8 @@ exports.uploadToGoogleBucket = async (file) => {
   });
 
   return new Promise((resolve, reject) => {
-    stream.on('error', (err) => {
-      reject(err);
-    });
-
-    stream.on('finish', () => {
-      resolve(`https://storage.googleapis.com/${process.env.GOOGLE_CLOUD_STORAGE_BUCKET}/${fileName}`);
-    });
-
+    stream.on('error', (err) => reject(err));
+    stream.on('finish', () => resolve(`https://storage.googleapis.com/${bucket.name}/${fileName}`));
     stream.end(file.buffer);
   });
 };
