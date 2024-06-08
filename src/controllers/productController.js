@@ -5,13 +5,13 @@ const fs = require('fs').promises;
 
 exports.createProduct = async (req, res) => {
   try {
-    await upload.single('image')(req, res, async (err) => {
+    upload.single('images')(req, res, async (err) => {
       if (err) {
         console.error('Error uploading file:', err);
         return res.status(400).json({ error: err.message });
       }
 
-      const image = req.file;
+      const imageFile = req.file;
 
       const {
         name,
@@ -26,32 +26,32 @@ exports.createProduct = async (req, res) => {
       } = req.body;
 
       console.log('Request data:', req.body);
-      console.log('File:', image);
+      console.log('File:', imageFile);
 
       if (!name || !weight || !calories || !fat || !proteins || !carbohydrate || !sugar || !sodium || !potassium) {
         return res.status(400).json({ error: 'Please provide all required fields' });
       }
 
-      if (!image) {
+      if (!imageFile) {
         return res.status(400).json({ error: 'Please provide an image' });
       }
 
-      const imageUrl = await googleBucket.uploadToGoogleBucket(image.path);
-      const product = await productService.createProduct(
+      const imageUrl = await googleBucket.uploadToGoogleBucket(imageFile.path);
+      const product = await productService.createProduct({
         name,
-        parseFloat(weight),
-        parseFloat(calories),
-        parseFloat(fat),
-        parseFloat(proteins),
-        parseFloat(carbohydrate),
-        parseFloat(sugar),
-        parseFloat(sodium),
-        parseFloat(potassium),
-        imageUrl
-      );
+        weight: parseFloat(weight),
+        calories: parseFloat(calories),
+        fat: parseFloat(fat),
+        proteins: parseFloat(proteins),
+        carbohydrate: parseFloat(carbohydrate),
+        sugar: parseFloat(sugar),
+        sodium: parseFloat(sodium),
+        potassium: parseFloat(potassium),
+        imageUrl,
+      });
       console.log('Product created:', product);
 
-      await fs.unlink(image.path);
+      await fs.unlink(imageFile.path);
 
       res.status(200).json(product);
     });
@@ -98,14 +98,14 @@ exports.getProductById = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    await upload.single('image')(req, res, async (err) => {
+    upload.single('images')(req, res, async (err) => {
       if (err) {
         console.error('Error uploading file:', err);
         return res.status(400).json({ error: err.message });
       }
 
       const { id } = req.params;
-      const image = req.file;
+      const imageFile = req.file;
       const {
         name,
         weight,
@@ -119,26 +119,28 @@ exports.updateProduct = async (req, res) => {
       } = req.body;
 
       console.log('Request data:', req.body);
-      console.log('File:', image);
+      console.log('File:', imageFile);
 
       let imageUrl;
-      if (image) {
-        imageUrl = await googleBucket.uploadToGoogleBucket(image.path);
-        await fs.unlink(image.path);
+      if (imageFile) {
+        imageUrl = await googleBucket.uploadToGoogleBucket(imageFile.path);
+        await fs.unlink(imageFile.path);
       }
 
       const product = await productService.updateProduct(
         id,
-        name,
-        parseFloat(weight),
-        parseFloat(calories),
-        parseFloat(fat),
-        parseFloat(proteins),
-        parseFloat(carbohydrate),
-        parseFloat(sugar),
-        parseFloat(sodium),
-        parseFloat(potassium),
-        imageUrl
+        {
+          name,
+          weight: parseFloat(weight),
+          calories: parseFloat(calories ),
+          fat: parseFloat(fat),
+          proteins: parseFloat(proteins),
+          carbohydrate: parseFloat(carbohydrate),
+          sugar: parseFloat(sugar),
+          sodium: parseFloat(sodium),
+          potassium: parseFloat(potassium),
+          imageUrl,
+        }
       );
       console.log('Product updated:', product);
       res.status(200).json(product);
