@@ -3,7 +3,7 @@ const googleBucket = require('../utils/googleBucket');
 const upload = require('../utils/multerConfig');
 
 exports.createProduct = async (req, res) => {
-  upload.single('images')(req, res, async (err) => {
+  upload.single('imageUrl')(req, res, async (err) => {
     try {
       if (err) {
         return res.status(400).json({ error: err.message });
@@ -80,7 +80,7 @@ exports.getProductById = async (req, res) => {
 };
 
 exports.updateProduct = async (req, res) => {
-  upload.single('images')(req, res, async (err) => {
+  upload.single('imageUrl')(req, res, async (err) => {
     try {
       if (err) {
         return res.status(400).json({ error: err.message });
