@@ -80,6 +80,18 @@ exports.getProducts = async (req, res) => {
   }
 };
 
+exports.getProductById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await productService.getProductById(id);
+    console.log('Product:', product);
+    res.status(200).json(product);
+  } catch (error) {
+    console.error('Error getting product by ID:', error);
+    res.status(404).json({ error: error.message });
+  }
+};
+
 exports.getProductByName = async (req, res) => {
   try {
     const { name } = req.params;
