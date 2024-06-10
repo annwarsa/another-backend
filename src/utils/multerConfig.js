@@ -1,8 +1,8 @@
+// multerConfig.js
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const esm = require('esm');
-const fileType = esm('file-type');
+const mime = require('mime-types');
 
 // Create the uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, '..', 'uploads');
@@ -19,9 +19,9 @@ const storage = multer.diskStorage({
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
     cb(null, `${file.fieldname}-${uniqueSuffix}`);
   },
-  mimetype: async (req, file, cb) => {
-    const fileData = await fileType.fromBuffer(file.buffer);
-    cb(null, fileData ? fileData.mime : 'application/octet-stream');
+  mimetype: (req, file, cb) => {
+    const mimetype = mime.lookup(file.originalname) || 'application/octet-stream';
+    cb(null, mimetype);
   },
 });
 
