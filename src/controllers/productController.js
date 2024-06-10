@@ -16,7 +16,6 @@ exports.createProduct = async (req, res) => {
       }
 
       const imageFile = req.file;
-
       const {
         name,
         weight,
@@ -32,8 +31,12 @@ exports.createProduct = async (req, res) => {
       console.log('Request data:', req.body);
       console.log('File:', imageFile);
 
-      if (!name || !weight || !calories || !fat || !proteins || !carbohydrate || !sugar || !sodium || !potassium) {
-        return res.status(400).json({ error: 'Please provide all required fields' });
+      // Validate required fields
+      const requiredFields = { name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium };
+      for (const [key, value] of Object.entries(requiredFields)) {
+        if (!value) {
+          return res.status(400).json({ error: `Please provide ${key}` });
+        }
       }
 
       if (!imageFile) {
@@ -58,7 +61,7 @@ exports.createProduct = async (req, res) => {
 
       await fs.unlink(path.join(uploadsDir, imageFile.filename));
 
-      res.status(200).json(product);
+      res.status(201).json(product);
     });
   } catch (error) {
     console.error('Error creating product:', error);
@@ -137,7 +140,7 @@ exports.updateProduct = async (req, res) => {
         {
           name,
           weight: parseFloat(weight),
-          calories: parseFloat(calories ),
+          calories: parseFloat(calories),
           fat: parseFloat(fat),
           proteins: parseFloat(proteins),
           carbohydrate: parseFloat(carbohydrate),
@@ -160,8 +163,8 @@ exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await productService.getProductById(id);
-    if (product.images) {
-      await googleBucket.deleteFromGoogleBucket(product.images);
+    if (product.imageUrl) {
+      await googleBucket.deleteFromGoogleBucket(product.imageUrl);
     }
     await productService.deleteProduct(id);
     console.log('Product deleted:', id);
