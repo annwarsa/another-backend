@@ -1,7 +1,8 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const fileType = require('file-type'); 
+const esm = require('esm');
+const fileType = esm('file-type');
 
 // Create the uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, '..', 'uploads');
