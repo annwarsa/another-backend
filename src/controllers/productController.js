@@ -7,9 +7,15 @@ const path = require('path');
 // Define the fixed upload path
 const uploadsDir = path.join(__dirname, '..', 'uploads');
 
+const uploadMiddleware = upload.single('images');
+
 exports.createProduct = async (req, res) => {
-  try {
-    await upload.single('images')(req, res);
+  uploadMiddleware(req, res, async (err) => {
+    if (err) {
+      console.error('Error uploading file:', err);
+      return res.status(400).json({ error: err.message });
+    }
+
     const imageFile = req.file;
     const {
       name,
@@ -63,10 +69,7 @@ exports.createProduct = async (req, res) => {
       console.error('Error creating product:', error);
       res.status(500).json({ error: error.message });
     }
-  } catch (error) {
-    console.error('Error uploading file:', error);
-    res.status(400).json({ error: error.message });
-  }
+  });
 };
 
 exports.getProducts = async (req, res) => {
@@ -105,8 +108,12 @@ exports.getProductByName = async (req, res) => {
 };
 
 exports.updateProduct = async (req, res) => {
-  try {
-    await upload.single('images')(req, res);
+  uploadMiddleware(req, res, async (err) => {
+    if (err) {
+      console.error('Error uploading file:', err);
+      return res.status(400).json({ error: err.message });
+    }
+
     const { id } = req.params;
     const imageFile = req.file;
     const {
@@ -157,10 +164,7 @@ exports.updateProduct = async (req, res) => {
       console.error('Error updating product:', error);
       res.status(400).json({ error: error.message });
     }
-  } catch (error) {
-    console.error('Error uploading file:', error);
-    res.status(400).json({ error: error.message });
-  }
+  });
 };
 
 exports.deleteProduct = async (req, res) => {
