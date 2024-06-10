@@ -9,41 +9,38 @@ const uploadsDir = path.join(__dirname, '..', 'uploads');
 
 exports.createProduct = async (req, res) => {
   try {
-    upload.single('images')(req, res, async (err) => {
-      if (err) {
-        console.error('Error uploading file:', err);
-        return res.status(400).json({ error: err.message });
+    await upload.single('images')(req, res);
+    const imageFile = req.file;
+    const {
+      name,
+      weight,
+      calories,
+      fat,
+      proteins,
+      carbohydrate,
+      sugar,
+      sodium,
+      potassium,
+    } = req.body;
+
+    console.log('Request data:', req.body);
+    console.log('File:', imageFile);
+
+    // Validate required fields
+    const requiredFields = { name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium };
+    for (const [key, value] of Object.entries(requiredFields)) {
+      if (!value) {
+        console.error(`Error: Please provide ${key}`);
+        return res.status(400).json({ error: `Please provide ${key}` });
       }
+    }
 
-      const imageFile = req.file;
-      const {
-        name,
-        weight,
-        calories,
-        fat,
-        proteins,
-        carbohydrate,
-        sugar,
-        sodium,
-        potassium,
-      } = req.body;
+    if (!imageFile) {
+      console.error('Error: Please provide an image');
+      return res.status(400).json({ error: 'Please provide an image' });
+    }
 
-      console.log('Request data:', req.body);
-      console.log('File:', imageFile);
-
-      // Validate required fields
-      const requiredFields = { name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium };
-      for (const [key, value] of Object.entries(requiredFields)) {
-        if (!value) {
-          return res.status(400).json({ error: `Please provide ${key}` });
-        }
-      }
-
-      if (!imageFile) {
-        return res.status(400).json({ error: 'Please provide an image' });
-      }
-
-      // Pass the correct file path to the uploadToGoogleBucket function
+    try {
       const imageUrl = await googleBucket.uploadToGoogleBucket(imageFile, uploadsDir, imageFile.filename);
       const product = await productService.createProduct({
         name,
@@ -62,10 +59,13 @@ exports.createProduct = async (req, res) => {
       await fs.unlink(path.join(uploadsDir, imageFile.filename));
 
       res.status(200).json(product);
-    });
+    } catch (error) {
+      console.error('Error creating product:', error);
+      res.status(500).json({ error: error.message });
+    }
   } catch (error) {
-    console.error('Error creating product:', error);
-    res.status(500).json({ error: error.message });
+    console.error('Error uploading file:', error);
+    res.status(400).json({ error: error.message });
   }
 };
 
@@ -92,49 +92,38 @@ exports.getProductByName = async (req, res) => {
   }
 };
 
-exports.getProductById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const product = await productService.getProductById(id);
-    console.log('Product:', product);
-    res.status(200).json(product);
-  } catch (error) {
-    console.error('Error getting product by id:', error);
-    res.status(404).json({ error: error.message });
-  }
-};
-
 exports.updateProduct = async (req, res) => {
   try {
-    upload.single('images')(req, res, async (err) => {
-      if (err) {
-        console.error('Error uploading file:', err);
-        return res.status(400).json({ error: err.message });
-      }
+    await upload.single('images')(req, res);
+    const { id } = req.params;
+    const imageFile = req.file;
+    const {
+      name,
+      weight,
+      calories,
+      fat,
+      proteins,
+      carbohydrate,
+      sugar,
+      sodium,
+      potassium,
+    } = req.body;
 
-      const { id } = req.params;
-      const imageFile = req.file;
-      const {
-        name,
-        weight,
-        calories,
-        fat,
-        proteins,
-        carbohydrate,
-        sugar,
-        sodium,
-        potassium,
-      } = req.body;
+    console.log('Request data:', req.body);
+    console.log('File:', imageFile);
 
-      console.log('Request data:', req.body);
-      console.log('File:', imageFile);
-
-      let imageUrl;
-      if (imageFile) {
+    let imageUrl;
+    if (imageFile) {
+      try {
         imageUrl = await googleBucket.uploadToGoogleBucket(imageFile, uploadsDir, imageFile.filename);
         await fs.unlink(path.join(uploadsDir, imageFile.filename));
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        return res.status(400).json({ error: error.message });
       }
+    }
 
+    try {
       const product = await productService.updateProduct(
         id,
         {
@@ -152,9 +141,12 @@ exports.updateProduct = async (req, res) => {
       );
       console.log('Product updated:', product);
       res.status(200).json(product);
-    });
+    } catch (error) {
+      console.error('Error updating product:', error);
+      res.status(400).json({ error: error.message });
+    }
   } catch (error) {
-    console.error('Error updating product:', error);
+    console.error('Error uploading file:', error);
     res.status(400).json({ error: error.message });
   }
 };

@@ -40,6 +40,7 @@ exports.createProduct = async (productData) => {
   });
   return product;
 };
+
 exports.getProducts = async () => {
   return await prisma.product.findMany();
 };
