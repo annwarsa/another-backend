@@ -15,6 +15,15 @@ exports.createProduct = async (productData) => {
     throw new Error(`Please provide all required fields: ${missingFields.join(', ')}`);
   }
 
+  // Check if a product with the same name already exists
+  const existingProduct = await prisma.product.findFirst({
+    where: { name: { equals: name, mode: 'insensitive' } },
+  });
+
+  if (existingProduct) {
+    throw new Error(`Product with name '${name}' already exists`);
+  }
+
   const product = await prisma.product.create({
     data: {
       name,
@@ -31,7 +40,6 @@ exports.createProduct = async (productData) => {
   });
   return product;
 };
-
 exports.getProducts = async () => {
   return await prisma.product.findMany();
 };
