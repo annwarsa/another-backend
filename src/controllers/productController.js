@@ -61,7 +61,7 @@ exports.createProduct = async (req, res) => {
 
       await fs.unlink(path.join(uploadsDir, imageFile.filename));
 
-      res.status(201).json(product);
+      res.status(200).json(product);
     });
   } catch (error) {
     console.error('Error creating product:', error);
@@ -163,8 +163,8 @@ exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await productService.getProductById(id);
-    if (product.imageUrl) {
-      await googleBucket.deleteFromGoogleBucket(product.imageUrl);
+    if (product.images) {
+      await googleBucket.deleteFromGoogleBucket(product.images);
     }
     await productService.deleteProduct(id);
     console.log('Product deleted:', id);
