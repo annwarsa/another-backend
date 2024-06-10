@@ -6,8 +6,13 @@ exports.createProduct = async (productData) => {
     name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium, imageUrl,
   } = productData;
 
-  if (!name || !weight || !calories || !fat || !proteins || !carbohydrate || !sugar || !sodium || !potassium || !imageUrl) {
-    throw new Error('Please provide all required fields');
+  const requiredFields = [
+    name, weight, calories, fat, proteins, carbohydrate, sugar, sodium, potassium, imageUrl,
+  ];
+  const missingFields = requiredFields.filter(field => field === undefined || field === null);
+
+  if (missingFields.length > 0) {
+    throw new Error(`Please provide all required fields: ${missingFields.join(', ')}`);
   }
 
   const product = await prisma.product.create({
