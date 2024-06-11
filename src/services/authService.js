@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Mailgun = require('mailgun.js');
 const formData = require('form-data');
+const crypto = require('crypto');
 
 const mailgun = new Mailgun(formData);
 const mg = mailgun.client({
@@ -20,7 +21,7 @@ exports.login = async (email, password) => {
   if (!isPasswordValid) throw new Error('Invalid email or password');
 
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-    expiresIn: '1h',
+    expiresIn: '30d',
   });
   return token;
 };
