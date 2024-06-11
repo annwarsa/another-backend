@@ -3,6 +3,7 @@ const googleBucket = require('../utils/googleBucket');
 const upload = require('../utils/multerConfig');
 const fs = require('fs').promises;
 const path = require('path');
+const axios = require('axios');
 
 // Define the fixed upload path
 const uploadsDir = path.join(__dirname, '..', 'uploads');
@@ -99,13 +100,33 @@ exports.getProductByName = async (req, res) => {
   try {
     const { name } = req.params;
     const product = await productService.getProductByName(name);
-    console.log('Product:', product);
-    res.status(200).json(product);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Fetch additional data from the nutrient API
+    const nutrientApiUrl = 'http://model.gizilo.com:8080/api/v1/nutrient';
+    const nutrientRequestBody = {
+      fat: product.fat,
+      sugar: product.sugar,
+      sodium: product.sodium,
+    };
+
+    const nutrientResponse = await axios.post(nutrientApiUrl, nutrientRequestBody);
+    const nutrientData = nutrientResponse.data;
+
+    // Combine the responses
+    const combinedResponse = {
+      ...product,
+      result: nutrientData.result,
+    };
+
+    res.status(200).json(combinedResponse);
   } catch (error) {
     console.error('Error getting product by name:', error);
-    res.status(404).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
-};
+};;
 
 exports.updateProduct = async (req, res) => {
   uploadMiddleware(req, res, async (err) => {
