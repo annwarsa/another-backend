@@ -98,7 +98,7 @@ exports.getProductById = async (req, res) => {
 
 exports.getProductByName = async (req, res) => {
   try {
-    const { name } = req.params;
+    const name = decodeURIComponent(req.params.name);
     const product = await productService.getProductByName(name);
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
@@ -126,7 +126,7 @@ exports.getProductByName = async (req, res) => {
     console.error('Error getting product by name:', error);
     res.status(500).json({ error: error.message });
   }
-};;
+};
 
 exports.updateProduct = async (req, res) => {
   uploadMiddleware(req, res, async (err) => {

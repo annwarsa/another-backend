@@ -46,11 +46,10 @@ exports.getProducts = async () => {
 };
 
 exports.getProductByName = async (name) => {
-  const searchTokens = _.words(name.toLowerCase());
   const product = await prisma.product.findFirst({
     where: {
       name: {
-        in: searchTokens,
+        equals: name,
         mode: 'insensitive',
       },
     },
